@@ -4,12 +4,17 @@ import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Home from "./pages/Home.jsx";
+import DonationHistory from "./pages/DonationHistory.jsx";
+import Supporters from "./pages/Supporter.jsx";
+import TopDonors from "./pages/TopDonor.jsx";
 import Requests from "./pages/Requests.jsx";
+import Messages from "./pages/ChatBox.jsx";
 import Placeholder from "./pages/Placeholder.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardLayout from "./components/DashboardLayout.jsx";
 import useAuthStore from "./store/authStore.js";
+
 
 export default function App() {
   // Revalidate any persisted token once, on app start.
@@ -30,10 +35,10 @@ export default function App() {
         <Route element={<DashboardLayout />}>
           <Route path="/home" element={<Home />} />
           <Route path="/requests" element={<Requests />} />
-          <Route path="/donations" element={<Placeholder title="Donations" />} />
-          <Route path="/top-donors" element={<Placeholder title="Top Donors" />} />
-          <Route path="/supporters" element={<Placeholder title="Supporters" />} />
-          <Route path="/messages" element={<Placeholder title="Messages" />} />
+          <Route path="/donations" element={<DonationHistory />} />
+          <Route path="/top-donors" element={<TopDonors/>} />
+          <Route path="/supporters" element={<Supporters/>} />
+          <Route path="/messages" element={<Messages/>} />
           <Route path="/profile" element={<Placeholder title="Profile" />} />
         </Route>
       </Route>
