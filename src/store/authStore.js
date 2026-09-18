@@ -1,6 +1,9 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import api from "../api/axios.js";
+import { disconnectSocket } from "../utils/socket.js";
+import useChatStore from "./chatStore.js";
+import useNotificationStore from "./notificationStore.js";
 
 // Single source of truth for auth state. Components subscribe with a
 // selector (e.g. `useAuthStore((s) => s.user)`) so they only re-render
@@ -27,6 +30,12 @@ const useAuthStore = create(
       },
 
       logout: () => {
+        // Close the live socket and wipe per-user state, otherwise the next
+        // person to log in on this browser would keep the old user's socket
+        // (and old chat / notification data).
+        disconnectSocket();
+        useChatStore.getState().reset();
+        useNotificationStore.getState().reset();
         set({ token: null, user: null, isAuthenticated: false });
       },
 

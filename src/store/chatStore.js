@@ -2,7 +2,7 @@ import { create } from "zustand";
 import api from "../api/axios.js";
 import { getSocket } from "../utils/socket.js";
 
-const useChatStore = create((set, get) => ({
+const initialState = {
   conversations: [],
   activeConversationId: null,
   messages: [],
@@ -11,19 +11,25 @@ const useChatStore = create((set, get) => ({
   onlineMap: {}, // userId -> boolean
   typingUserId: null,
   allUsers: [],
-loadingUsers: false,
+  loadingUsers: false,
+};
 
+const useChatStore = create((set, get) => ({
+  ...initialState,
 
-fetchAllUsers: async () => {
-  set({ loadingUsers: true });
-  try {
-    const { data } = await api.get("/users");
-    set({ allUsers: data.users, loadingUsers: false });
-  } catch (err) {
-    console.error(err);
-    set({ loadingUsers: false });
-  }
-},
+  // Called on logout so the next user doesn't see the previous user's chats
+  reset: () => set({ ...initialState }),
+
+  fetchAllUsers: async () => {
+    set({ loadingUsers: true });
+    try {
+      const { data } = await api.get("/users");
+      set({ allUsers: data.users, loadingUsers: false });
+    } catch (err) {
+      console.error(err);
+      set({ loadingUsers: false });
+    }
+  },
 
   fetchConversations: async () => {
     set({ loadingConversations: true });
@@ -66,7 +72,7 @@ fetchAllUsers: async () => {
     const socket = getSocket();
     if (!socket) return;
 
-    // Optimistic append; server echoes back via message:new and we dedupe by _id
+    // Server echoes back via message:new and we dedupe by _id
     socket.emit(
       "message:send",
       { conversationId: activeConversationId, text: text.trim() },

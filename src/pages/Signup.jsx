@@ -7,6 +7,7 @@ import BasicDetailsStep from "../components/signup/BasicDetailsStep.jsx";
 import PersonalDetailsStep from "../components/signup/PersonalDetailsStep.jsx";
 import BloodInfoStep from "../components/signup/BloodInfoStep.jsx";
 import LocationStep from "../components/signup/LocationStep.jsx";
+import { ROLES } from "../utils/constants.js";
 
 const TOTAL_STEPS = 4;
 
@@ -34,7 +35,11 @@ export default function Signup() {
   const register = useAuthStore((state) => state.register);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const intent = searchParams.get("intent");
+  const intent = searchParams.get("intent"); // "donate" | "need" | null
+
+  // Landing page's "Donate Blood" / "Need Blood" decides the role.
+  // If someone opens /signup directly (no intent), they pick it on step 1.
+  const [role, setRole] = useState(intent === "need" ? ROLES.PATIENT : ROLES.DONOR);
 
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -100,6 +105,7 @@ export default function Signup() {
           phone: finalForm.phone,
           email: finalForm.email || undefined,
           password: finalForm.password,
+          role,
           bloodGroup: finalForm.bloodGroup,
           dateOfBirth: finalForm.dateOfBirth || undefined,
           gender: finalForm.gender || undefined,
@@ -108,43 +114,73 @@ export default function Signup() {
           area: finalForm.area,
           pincode: finalForm.pincode,
         });
-        navigate("/home", { replace: true });
+        // Donor -> "You're about to become someone's hope"
+        // Patient -> "Let's find the help you need"
+        navigate("/onboarding", { replace: true });
       } catch (err) {
         setSubmitError(err.response?.data?.message || "Unable to sign up. Please try again.");
         setSubmitting(false);
       }
     },
-    [form, register, navigate]
+    [form, register, navigate, role]
   );
 
   return (
     <div className="min-h-screen bg-[#f4f2f0]">
-      <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto flex items-center px-6 py-4">
+      <header className="border-b border-gray-200 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
-            <Droplet className="text-brand-500 fill-brand-500" size={26} />
+            <Droplet className="fill-brand-500 text-brand-500" size={26} />
             <div>
-              <p className="font-extrabold text-lg leading-none">RaktSaathi</p>
-              <p className="text-[11px] tracking-wide text-brand-500 font-semibold">JABALPUR</p>
+              <p className="text-lg font-extrabold leading-none">RaktSaathi</p>
+              <p className="text-[11px] font-semibold tracking-wide text-brand-500">JABALPUR</p>
             </div>
           </Link>
         </div>
       </header>
 
       <main className="flex items-center justify-center px-6 py-16">
-        <div className="bg-white rounded-2xl shadow-sm max-w-md w-full p-8">
+        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
           <StepProgress step={step} totalSteps={TOTAL_STEPS} onBack={goBack} />
 
           {step === 1 && (
             <p className="sr-only">
-              {intent === "need"
+              {role === ROLES.PATIENT
                 ? "Sign up to post a blood request and find donors nearby."
                 : "Sign up and become part of Jabalpur's donor network."}
             </p>
           )}
 
-          {step === 1 && <BasicDetailsStep initialValues={basicInitial} onContinue={handleBasicContinue} />}
-          {step === 2 && <PersonalDetailsStep initialValues={personalInitial} onContinue={handlePersonalContinue} />}
+          {/* Only shown when the person didn't come from a Donate / Need button */}
+          {step === 1 && !intent && (
+            <div className="mb-6 grid grid-cols-2 gap-3">
+              {[
+                { value: ROLES.DONOR, label: "I want to donate" },
+                { value: ROLES.PATIENT, label: "I need blood" },
+              ].map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  onClick={() => setRole(option.value)}
+                  aria-pressed={role === option.value}
+                  className={`rounded-lg border py-2.5 text-sm font-semibold transition-colors ${
+                    role === option.value
+                      ? "border-brand-500 bg-brand-50 text-brand-600"
+                      : "border-gray-300 text-gray-700 hover:bg-gray-50"
+                  }`}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+          )}
+
+          {step === 1 && (
+            <BasicDetailsStep initialValues={basicInitial} onContinue={handleBasicContinue} />
+          )}
+          {step === 2 && (
+            <PersonalDetailsStep initialValues={personalInitial} onContinue={handlePersonalContinue} />
+          )}
           {step === 3 && <BloodInfoStep initialValues={bloodInitial} onContinue={handleBloodContinue} />}
           {step === 4 && (
             <>
@@ -153,14 +189,14 @@ export default function Signup() {
                 onContinue={handleLocationContinue}
                 submitting={submitting}
               />
-              {submitError && <p className="text-sm text-red-600 mt-3">{submitError}</p>}
+              {submitError && <p className="mt-3 text-sm text-red-600">{submitError}</p>}
             </>
           )}
 
           {step === 1 && (
-            <p className="text-center text-gray-500 text-sm mt-5">
+            <p className="mt-5 text-center text-sm text-gray-500">
               Already have an account?{" "}
-              <Link to="/login" className="text-brand-600 font-semibold">
+              <Link to="/login" className="font-semibold text-brand-600">
                 Login
               </Link>
             </p>

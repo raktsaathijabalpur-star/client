@@ -1,23 +1,15 @@
-import React, { useCallback, useMemo, useState, useEffect } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, ArrowLeft, X } from "lucide-react";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
 import api from "../api/axios.js";
-
-// Fallback sample data — sirf tab dikhta hai jab backend se data na aaye
-// ya API call fail ho jaaye, taaki UI kabhi khali na lage.
-const SAMPLE_DONATIONS = [
-  { _id: "sample-1", date: "2026-06-15", location: "ABC Hospital" },
-  { _id: "sample-2", date: "2026-02-10", location: "XYZ Hospital" },
-  { _id: "sample-3", date: "2025-09-05", location: "ABC Hospital" },
-];
-
-function formatMonthYear(dateStr) {
-  const d = new Date(dateStr);
-  if (isNaN(d)) return dateStr;
-  return d.toLocaleDateString("en-IN", { month: "long", year: "numeric" });
-}
+import useAuthStore from "../store/authStore.js";
+import useNotificationStore from "../store/notificationStore.js";
+import { formatMonthYear } from "../utils/format.js";
 
 export default function DonationHistory() {
+  const updateUser = useAuthStore((state) => state.updateUser);
+  const requestVersion = useNotificationStore((state) => state.requestVersion);
+
   const [donations, setDonations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -28,22 +20,21 @@ export default function DonationHistory() {
   const [formError, setFormError] = useState("");
   const [saving, setSaving] = useState(false);
 
-  // Fetch donation history from backend, fall back to sample data on empty/error
+  const today = new Date().toISOString().split("T")[0];
+
+  // Donations come from two places: requests a patient marked as fulfilled
+  // (added automatically) and donations the donor adds manually.
+  // Re-fetches when a socket event says a request was fulfilled.
   useEffect(() => {
     let active = true;
     (async () => {
-      setLoading(true);
       setError(null);
       try {
         const res = await api.get("/donations/me");
-        const data = Array.isArray(res.data) ? res.data : res.data?.donations ?? [];
-        if (active) setDonations(data.length ? data : SAMPLE_DONATIONS);
+        if (active) setDonations(res.data?.donations ?? []);
       } catch (err) {
         console.error(err);
-        if (active) {
-          setError("Could not load donation history. Showing sample data.");
-          setDonations(SAMPLE_DONATIONS);
-        }
+        if (active) setError(err.response?.data?.message || "Could not load your donation history.");
       } finally {
         if (active) setLoading(false);
       }
@@ -51,7 +42,7 @@ export default function DonationHistory() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [requestVersion]);
 
   const total = useMemo(() => donations.length, [donations]);
 
@@ -63,66 +54,68 @@ export default function DonationHistory() {
   }, []);
 
   const handleSave = useCallback(async () => {
-    if (!dateInput.trim() || !locationInput.trim()) {
+    if (!dateInput || !locationInput.trim()) {
       setFormError("Please fill both fields.");
       return;
     }
     setSaving(true);
     setFormError("");
-    const payload = { date: dateInput, location: locationInput };
     try {
-      const res = await api.post("/donations", payload);
-      const saved = res.data?.donation ?? { ...payload, _id: `temp-${Date.now()}` };
-      setDonations((prev) => [saved, ...prev]);
+      const res = await api.post("/donations", { date: dateInput, location: locationInput.trim() });
+      setDonations((prev) => [res.data.donation, ...prev]);
+      if (res.data.user) updateUser(res.data.user); // donation count + last donation on Home
       closeModal();
     } catch (err) {
-      console.error(err);
-      // Optimistic fallback so a flaky backend doesn't block the user
-      setDonations((prev) => [{ ...payload, _id: `temp-${Date.now()}` }, ...prev]);
-      closeModal();
+      setFormError(err.response?.data?.message || "Couldn't save this donation. Please try again.");
     } finally {
       setSaving(false);
     }
-  }, [dateInput, locationInput, closeModal]);
+  }, [dateInput, locationInput, closeModal, updateUser]);
 
   return (
     <div>
       <DashboardTopbar title="Donation History" />
 
-      <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
+      <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Heart className="fill-red-500 text-red-500" size={22} />
           <span className="text-lg font-bold text-gray-900">{total}</span>
-          <span className="text-gray-500 text-sm">Total Donations</span>
+          <span className="text-sm text-gray-500">Total Donations</span>
         </div>
 
         <button
           type="button"
           onClick={() => setModalOpen(true)}
-          className="rounded-full border border-red-600 px-4 py-2 text-sm font-bold text-red-600 hover:bg-red-50 transition-colors"
+          className="rounded-full border border-red-600 px-4 py-2 text-sm font-bold text-red-600 transition-colors hover:bg-red-50"
         >
           + Add Donation
         </button>
       </div>
 
-      {loading && <p className="text-gray-500 text-sm mb-3">Loading donation history...</p>}
-      {error && <p className="text-amber-600 text-xs mb-3">{error}</p>}
+      {loading && <p className="mb-3 text-sm text-gray-500">Loading donation history...</p>}
+      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      <div className="rounded-2xl bg-white shadow-sm divide-y divide-gray-100 overflow-hidden">
+      <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm">
         {donations.map((donation) => (
           <div key={donation._id} className="flex items-center gap-3 px-5 py-4 sm:px-6 sm:py-5">
-            <span className="w-2 h-2 rounded-full bg-red-600 shrink-0" />
-            <div>
-              <p className="font-bold text-gray-900 text-sm sm:text-base">
+            <span className="h-2 w-2 shrink-0 rounded-full bg-red-600" />
+            <div className="min-w-0 flex-1">
+              <p className="text-sm font-bold text-gray-900 sm:text-base">
                 {formatMonthYear(donation.date)}
               </p>
-              <p className="text-gray-500 text-xs sm:text-sm">{donation.location}</p>
+              <p className="text-xs text-gray-500 sm:text-sm">{donation.location}</p>
             </div>
+            {donation.requestId && (
+              <span className="shrink-0 font-mono text-xs text-gray-400">{donation.requestId}</span>
+            )}
           </div>
         ))}
 
-        {!loading && donations.length === 0 && (
-          <p className="text-gray-500 text-sm px-6 py-6">No donations recorded yet.</p>
+        {!loading && !error && donations.length === 0 && (
+          <p className="px-6 py-6 text-sm text-gray-500">
+            No donations recorded yet. When a patient marks a request you accepted as fulfilled, it
+            appears here automatically.
+          </p>
         )}
       </div>
 
@@ -135,33 +128,49 @@ export default function DonationHistory() {
             className="w-full max-w-md rounded-2xl bg-white p-6 shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="flex items-center justify-between mb-5">
+            <div className="mb-5 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <button type="button" onClick={closeModal} className="text-gray-500 hover:text-gray-800" aria-label="Back">
+                <button
+                  type="button"
+                  onClick={closeModal}
+                  className="text-gray-500 hover:text-gray-800"
+                  aria-label="Back"
+                >
                   <ArrowLeft size={20} />
                 </button>
                 <h2 className="text-lg font-bold text-gray-900">Add Donation</h2>
               </div>
-              <button type="button" onClick={closeModal} className="text-gray-400 hover:text-gray-700" aria-label="Close">
+              <button
+                type="button"
+                onClick={closeModal}
+                className="text-gray-400 hover:text-gray-700"
+                aria-label="Close"
+              >
                 <X size={20} />
               </button>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-600 mb-1.5">Donation Date</label>
+                <label htmlFor="donationDate" className="mb-1.5 block text-sm text-gray-600">
+                  Donation Date
+                </label>
                 <input
-                  type="text"
+                  id="donationDate"
+                  type="date"
+                  max={today}
                   value={dateInput}
                   onChange={(e) => setDateInput(e.target.value)}
-                  placeholder="e.g. 20 August 2026"
                   className="w-full rounded-xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                 />
               </div>
 
               <div>
-                <label className="block text-sm text-gray-600 mb-1.5">Hospital / Blood Bank</label>
+                <label htmlFor="donationLocation" className="mb-1.5 block text-sm text-gray-600">
+                  Hospital / Blood Bank
+                </label>
                 <input
+                  id="donationLocation"
                   type="text"
                   value={locationInput}
                   onChange={(e) => setLocationInput(e.target.value)}
@@ -170,13 +179,13 @@ export default function DonationHistory() {
                 />
               </div>
 
-              {formError && <p className="text-red-600 text-xs">{formError}</p>}
+              {formError && <p className="text-xs text-red-600">{formError}</p>}
 
               <button
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="w-full rounded-xl bg-red-600 py-3.5 text-sm font-bold text-white hover:bg-red-700 disabled:opacity-60 transition-colors"
+                className="w-full rounded-xl bg-red-600 py-3.5 text-sm font-bold text-white transition-colors hover:bg-red-700 disabled:opacity-60"
               >
                 {saving ? "Saving..." : "Save Donation"}
               </button>

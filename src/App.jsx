@@ -3,6 +3,7 @@ import { Routes, Route } from "react-router-dom";
 import Landing from "./pages/Landing.jsx";
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
+import Onboarding from "./pages/Onboarding.jsx";
 import Home from "./pages/Home.jsx";
 import DonationHistory from "./pages/DonationHistory.jsx";
 import Supporters from "./pages/Supporter.jsx";
@@ -14,7 +15,7 @@ import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardLayout from "./components/DashboardLayout.jsx";
 import useAuthStore from "./store/authStore.js";
-
+import { ROLES } from "./utils/constants.js";
 
 export default function App() {
   // Revalidate any persisted token once, on app start.
@@ -32,14 +33,22 @@ export default function App() {
       <Route path="/signup" element={<Signup />} />
 
       <Route element={<ProtectedRoute />}>
+        {/* Right after signup: donor setup OR the patient's first blood request */}
+        <Route path="/onboarding" element={<Onboarding />} />
+
         <Route element={<DashboardLayout />}>
+          {/* Same URLs for everyone — the page shows donor or patient content by role */}
           <Route path="/home" element={<Home />} />
           <Route path="/requests" element={<Requests />} />
-          <Route path="/donations" element={<DonationHistory />} />
-          <Route path="/top-donors" element={<TopDonors/>} />
-          <Route path="/supporters" element={<Supporters/>} />
-          <Route path="/messages" element={<Messages/>} />
+          <Route path="/supporters" element={<Supporters />} />
+          <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Placeholder title="Profile" />} />
+
+          {/* Donor-only pages */}
+          <Route element={<ProtectedRoute roles={[ROLES.DONOR]} />}>
+            <Route path="/donations" element={<DonationHistory />} />
+            <Route path="/top-donors" element={<TopDonors />} />
+          </Route>
         </Route>
       </Route>
 
