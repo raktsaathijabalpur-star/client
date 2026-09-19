@@ -41,7 +41,7 @@ function ContactActions({ phone, userId, name = "", whatsappText = "", variant =
           onClick={() => openChat(userId)}
           disabled={chatBusy}
           aria-label={`Chat with ${name}`.trim()}
-          title="Chat in RaktSaathi"
+          title="Chat in Blood Seva"
           className={`${base} bg-brand-500 text-white hover:bg-brand-600 disabled:opacity-60`}
         >
           <MessageCircle size={isIcon ? 20 : 18} />

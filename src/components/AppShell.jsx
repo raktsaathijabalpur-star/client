@@ -45,7 +45,7 @@ export default function AppShell({ renderSidebar, badge }) {
         <div className="flex items-center gap-2">
           <Droplet className="fill-brand-500 text-brand-500" size={22} />
           <p className="text-base font-extrabold leading-none">
-            RaktSaathi{" "}
+            Blood Seva{" "}
             <span className="text-[10px] font-semibold tracking-wide text-brand-500">
               {badge ?? "JABALPUR"}
             </span>

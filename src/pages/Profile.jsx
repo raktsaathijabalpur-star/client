@@ -82,7 +82,7 @@ export default function Profile() {
           </div>
 
           <div className="mt-6 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-5 text-white">
-            <p className="font-extrabold">Support Jabalpur RaktSaathi</p>
+            <p className="font-extrabold">Support Jabalpur Blood Seva</p>
             <p className="mt-2 text-sm text-white/85">
               Help us keep this platform free for donors and patients.
             </p>

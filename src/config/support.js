@@ -3,7 +3,7 @@
 // While the account number still contains "XXXX", the donate window shows a
 // "not set up yet" notice instead of real-looking bank details.
 export const SUPPORT_ACCOUNT = {
-  name: "Jabalpur RaktSaathi",
+  name: "Jabalpur Blood Seva",
   number: "XXXXXXXXXXXX",
   ifsc: "XXXX0XXXXXX",
   // Put your QR image in frontend/public/support-qr.png (or change this path)

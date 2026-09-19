@@ -140,7 +140,7 @@ export default function Signup() {
           <Link to="/" className="flex items-center gap-2">
             <Droplet className="fill-brand-500 text-brand-500" size={26} />
             <div>
-              <p className="text-lg font-extrabold leading-none">RaktSaathi</p>
+              <p className="text-lg font-extrabold leading-none">Blood Seva</p>
               <p className="text-[11px] font-semibold tracking-wide text-brand-500">JABALPUR</p>
             </div>
           </Link>

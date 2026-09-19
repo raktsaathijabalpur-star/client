@@ -1,5 +1,5 @@
-export const TOKEN_KEY = "raktsaathi_token";
-export const USER_KEY = "raktsaathi_user";
+export const TOKEN_KEY = "Blood Seva_token";
+export const USER_KEY = "Blood Seva_user";
 
 export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 

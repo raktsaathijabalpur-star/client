@@ -47,7 +47,7 @@ export default function Login() {
           <Link to="/" className="flex items-center gap-2">
             <Droplet className="text-brand-500 fill-brand-500" size={26} />
             <div>
-              <p className="font-extrabold text-lg leading-none">RaktSaathi</p>
+              <p className="font-extrabold text-lg leading-none">Blood Seva</p>
               <p className="text-[11px] tracking-wide text-brand-500 font-semibold">JABALPUR</p>
             </div>
           </Link>

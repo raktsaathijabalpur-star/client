@@ -38,7 +38,7 @@ function DetailRow({ label, value, copyable = false }) {
   );
 }
 
-// "Support Jabalpur RaktSaathi" — amount chips, Bank Transfer / QR Code, "I've Donated"
+// "Support Jabalpur Blood Seva" — amount chips, Bank Transfer / QR Code, "I've Donated"
 export default function SupportModal({ onClose }) {
   const pushToast = useNotificationStore((state) => state.pushToast);
 
@@ -81,9 +81,9 @@ export default function SupportModal({ onClose }) {
   };
 
   return (
-    <Modal title="Support Jabalpur RaktSaathi" onClose={onClose} maxWidth="max-w-lg">
+    <Modal title="Support Jabalpur Blood Seva" onClose={onClose} maxWidth="max-w-lg">
       <p className="mb-5 text-center text-sm text-gray-500">
-        Your kindness just helped someone. Consider supporting Jabalpur RaktSaathi so we can keep
+        Your kindness just helped someone. Consider supporting Jabalpur Blood Seva so we can keep
         connecting donors and patients for free.
       </p>
 
@@ -158,7 +158,7 @@ export default function SupportModal({ onClose }) {
             <div className="flex flex-col items-center py-2">
               <img
                 src={SUPPORT_ACCOUNT.qrImage}
-                alt="QR code to support Jabalpur RaktSaathi"
+                alt="QR code to support Jabalpur Blood Seva"
                 onError={() => setQrMissing(true)}
                 className="h-44 w-44 object-contain"
               />

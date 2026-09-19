@@ -12,7 +12,7 @@ export default function Landing() {
           <div className="flex items-center gap-2">
             <Droplet className="text-brand-500 fill-brand-500" size={26} />
             <div>
-              <p className="font-extrabold text-lg leading-none">RaktSaathi</p>
+              <p className="font-extrabold text-lg leading-none">Blood Seva</p>
               <p className="text-[11px] tracking-wide text-brand-500 font-semibold">JABALPUR</p>
             </div>
           </div>
@@ -32,7 +32,7 @@ export default function Landing() {
             Every drop can save a life.
           </h1>
           <p className="text-gray-500 text-base sm:text-lg leading-relaxed max-w-md">
-            Jabalpur RaktSaathi connects blood donors with patients in need, in your own
+            Jabalpur Blood Seva connects blood donors with patients in need, in your own
             city. Find donors fast, or register to help someone when it matters most.
           </p>
         </div>

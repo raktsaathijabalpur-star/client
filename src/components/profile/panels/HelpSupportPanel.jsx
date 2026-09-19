@@ -4,7 +4,7 @@ import { SUPPORT_CONTACT } from "../../../config/support.js";
 
 const FAQS = [
   {
-    q: "How does RaktSaathi match donors and patients?",
+    q: "How does Blood Seva match donors and patients?",
     a: "Patients post a request with blood group, hospital and urgency. Donors whose blood group can safely be given to that patient are alerted and can tap 'I Can Donate'. The patient also gets a list of matching donors in their city.",
   },
   {
@@ -57,7 +57,7 @@ export default function HelpSupportPanel() {
 
       <p className="rounded-xl bg-red-50 px-4 py-3 text-xs text-red-700">
         In a medical emergency, call your local emergency number or go straight to the nearest
-        hospital or blood bank. RaktSaathi is a connecting platform and can't guarantee a donor.
+        hospital or blood bank. Blood Seva is a connecting platform and can't guarantee a donor.
       </p>
     </div>
   );

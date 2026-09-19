@@ -19,7 +19,7 @@ const idPart = (request) => (request?.requestId ? ` ${request.requestId}` : "");
 // Ready-made first message when a donor contacts the patient
 export function donorToPatientMessage(request, donorName) {
   return (
-    `Hi ${request.patientName || "there"}, I'm ${donorName || "a donor"} from RaktSaathi Jabalpur. ` +
+    `Hi ${request.patientName || "there"}, I'm ${donorName || "a donor"} from Blood Seva Jabalpur. ` +
     `I saw your request${idPart(request)} for ${request.bloodGroup} blood at ${request.hospitalName} ` +
     `and I can donate. Please share the details.`
   );

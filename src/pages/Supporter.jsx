@@ -61,7 +61,7 @@ export default function Supporters() {
       <div className="mb-6 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-6 text-center text-white sm:mb-8 sm:p-8">
         <p className="mb-2 text-4xl font-extrabold sm:text-5xl">{totalCount}</p>
         <p className="text-sm text-white/80 sm:text-base">
-          {totalCount === 1 ? "person has" : "people have"} supported Jabalpur RaktSaathi
+          {totalCount === 1 ? "person has" : "people have"} supported Jabalpur Blood Seva
         </p>
         {totalAmount > 0 && (
           <p className="mt-3 text-sm font-semibold text-white/90 sm:text-base">

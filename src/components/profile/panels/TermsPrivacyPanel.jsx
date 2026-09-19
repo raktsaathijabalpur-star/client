@@ -5,7 +5,7 @@ import React from "react";
 // replace (or link to) them here.
 const SECTIONS = [
   {
-    title: "What RaktSaathi is",
+    title: "What Blood Seva is",
     body: "A free platform that connects blood donors and patients in Jabalpur. We don't sell blood, run a blood bank or guarantee that a donor will be found.",
   },
   {

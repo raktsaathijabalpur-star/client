@@ -39,7 +39,7 @@ export default function NotificationsPanel() {
       </div>
       <FormError message={error} />
       <p className="mt-4 text-xs text-gray-400">
-        These control the pop-ups and bell alerts shown while you're using RaktSaathi.
+        These control the pop-ups and bell alerts shown while you're using Blood Seva.
       </p>
     </div>
   );

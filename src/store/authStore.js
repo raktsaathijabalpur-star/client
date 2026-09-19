@@ -65,7 +65,7 @@ const useAuthStore = create(
       },
     }),
     {
-      name: "raktsaathi-auth", // localStorage key
+      name: "Blood Seva-auth", // localStorage key
       partialize: (state) => ({ token: state.token, user: state.user }),
     }
   )
