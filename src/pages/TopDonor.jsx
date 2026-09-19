@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Droplet } from "lucide-react";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
+import Avatar from "../components/Avatar.jsx";
+import { PageLoader } from "../components/Spinner.jsx";
 import api from "../api/axios.js";
 
 const RANK_COLORS = {
@@ -38,7 +40,7 @@ export default function TopDonors() {
     <div>
       <DashboardTopbar title="Top Donors" />
 
-      {loading && <p className="mb-3 text-sm text-gray-500">Loading top donors...</p>}
+      {loading && <PageLoader label="Loading top donors" />}
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
       <p className="mb-4 text-sm text-gray-500">Ranked by total donations, all time</p>
@@ -59,13 +61,7 @@ export default function TopDonors() {
                 {rank}
               </span>
 
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gray-100">
-                {donor.avatarUrl ? (
-                  <img src={donor.avatarUrl} alt={donor.name} className="h-full w-full object-cover" />
-                ) : (
-                  <span className="text-sm font-bold text-gray-400">{donor.name?.charAt(0)}</span>
-                )}
-              </div>
+              <Avatar user={donor} size={44} />
 
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-bold text-gray-900 sm:text-base">{donor.name}</p>

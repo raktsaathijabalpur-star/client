@@ -1,6 +1,7 @@
 import React from "react";
 import { MessageCircle } from "lucide-react";
 import Modal from "../Modal.jsx";
+import Avatar from "../Avatar.jsx";
 import useOpenChat from "../../hooks/useOpenChat.js";
 
 // List of potential donors for a patient's request, with a "Message" button
@@ -18,9 +19,7 @@ export default function MatchingDonorsModal({ donors, onClose }) {
         <ul className="divide-y divide-gray-100 rounded-2xl border border-gray-200">
           {donors.map((donor) => (
             <li key={donor._id} className="flex items-center gap-3 px-3 py-3 sm:px-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gray-100 text-sm font-bold text-gray-500">
-                {donor.name?.charAt(0)}
-              </div>
+              <Avatar user={donor} size={40} />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-gray-900">{donor.name}</p>
                 <p className="truncate text-xs text-gray-500">

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { Heart, Droplet, Calendar } from "lucide-react";
 import DashboardTopbar from "../../components/DashboardTopbar.jsx";
 import StatCard from "../../components/StatCard.jsx";
+import { PageLoader } from "../../components/Spinner.jsx";
 import RequestCard from "../../components/RequestCard.jsx";
 import RequestDetailModal from "../../components/RequestDetailModal.jsx";
 import useAuthStore from "../../store/authStore.js";
@@ -110,7 +111,7 @@ export default function DonorHome() {
         </Link>
       </div>
 
-      {loading && <p className="text-sm text-gray-500">Loading nearby requests...</p>}
+      {loading && <PageLoader label="Loading nearby requests" />}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-2">

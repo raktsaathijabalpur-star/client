@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
+import { PageLoader } from "../components/Spinner.jsx";
 import api from "../api/axios.js";
 
 function timeAgo(timestamp) {
@@ -54,7 +55,7 @@ export default function Supporters() {
     <div>
       <DashboardTopbar title="Supporters" />
 
-      {loading && <p className="mb-3 text-sm text-gray-500">Loading supporters...</p>}
+      {loading && <PageLoader label="Loading supporters" />}
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
       <div className="mb-6 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-6 text-center text-white sm:mb-8 sm:p-8">

@@ -1,6 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Send, MessageCircle } from "lucide-react";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
+import Avatar from "../components/Avatar.jsx";
+import { PageLoader, Spinner } from "../components/Spinner.jsx";
 import useAuthStore from "../store/authStore.js";
 import useChatStore from "../store/chatStore.js";
 import { getUserId, isOwnMessage } from "../utils/chat.js";
@@ -48,6 +51,18 @@ export default function Messages() {
   useEffect(() => {
     if (!activeConversationId) setShowChatOnMobile(false);
   }, [activeConversationId]);
+
+  // /messages?c=<id> (e.g. from a notification) opens that conversation
+  const [searchParams] = useSearchParams();
+  const deepLinkId = searchParams.get("c");
+  const deepLinkOpened = useRef(null);
+  useEffect(() => {
+    if (deepLinkId && deepLinkOpened.current !== deepLinkId) {
+      deepLinkOpened.current = deepLinkId;
+      setActiveConversation(deepLinkId);
+      setShowChatOnMobile(true);
+    }
+  }, [deepLinkId, setActiveConversation]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -110,7 +125,10 @@ export default function Messages() {
           }`}
         >
           {loadingConversations && (
-            <p className="text-gray-500 text-sm p-5">Loading conversations...</p>
+            <div className="flex items-center gap-2 p-5 text-sm text-gray-500">
+              <Spinner size={16} />
+              Loading conversations…
+            </div>
           )}
 
           {/* Existing conversations */}
@@ -123,9 +141,7 @@ export default function Messages() {
                 c._id === activeConversationId ? "bg-red-50" : "hover:bg-gray-50"
               }`}
             >
-              <div className="w-11 h-11 rounded-full bg-gray-100 shrink-0 flex items-center justify-center text-gray-400 font-bold text-sm">
-                {c.otherUser?.name?.charAt(0)}
-              </div>
+              <Avatar user={c.otherUser} size={44} />
               <div className="min-w-0 flex-1">
                 <p className="font-bold text-gray-900 text-sm truncate">{c.otherUser?.name}</p>
                 <p className="text-gray-500 text-xs truncate">{c.lastMessage || "Say hello 👋"}</p>
@@ -149,7 +165,12 @@ export default function Messages() {
                 Start a Conversation
               </p>
 
-              {loadingUsers && <p className="text-gray-400 text-xs px-5 pb-3">Loading users...</p>}
+              {loadingUsers && (
+                <div className="flex items-center gap-2 px-5 pb-3 text-xs text-gray-400">
+                  <Spinner size={14} />
+                  Loading users…
+                </div>
+              )}
 
               {usersWithoutConversation.map((u) => (
                 <button
@@ -159,9 +180,7 @@ export default function Messages() {
                   disabled={startingChatWith === u._id}
                   className="w-full text-left px-5 py-3 border-b border-gray-50 flex items-center gap-3 hover:bg-gray-50 transition-colors disabled:opacity-50"
                 >
-                  <div className="w-10 h-10 rounded-full bg-gray-100 shrink-0 flex items-center justify-center text-gray-400 font-bold text-xs">
-                    {u.name?.charAt(0)}
-                  </div>
+                  <Avatar user={u} size={40} />
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 text-sm truncate">{u.name}</p>
                     <p className="text-gray-400 text-xs truncate">
@@ -194,9 +213,7 @@ export default function Messages() {
                 >
                   ←
                 </button>
-                <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-400 font-bold text-xs shrink-0">
-                  {activeConversation.otherUser?.name?.charAt(0)}
-                </div>
+                <Avatar user={activeConversation.otherUser} size={36} />
                 <div>
                   <p className="font-bold text-gray-900 text-sm">
                     {activeConversation.otherUser?.name}
@@ -217,7 +234,7 @@ export default function Messages() {
               </div>
 
               <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5 space-y-3">
-                {loadingMessages && <p className="text-gray-400 text-xs">Loading messages...</p>}
+                {loadingMessages && <PageLoader label="Loading messages" />}
 
                 {messages.map((m) => {
                   const isMine = isOwnMessage(m, currentUser);

@@ -1,5 +1,7 @@
 import React, { useCallback, useMemo, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
+import { PageLoader } from "../components/Spinner.jsx";
 import RequestCard from "../components/RequestCard.jsx";
 import RequestDetailModal from "../components/RequestDetailModal.jsx";
 import MyRequestCard from "../components/requests/MyRequestCard.jsx";
@@ -49,7 +51,8 @@ function NearbyRequests() {
   const { requests, loading, error, refetch } = useRequests(filters);
   const actions = useRequestActions(refetch);
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState(() => searchParams.get("open")); // /requests?open=<id> from a notification
   const selectedRequest = useMemo(
     () => requests.find((r) => r._id === selectedId) ?? null,
     [requests, selectedId]
@@ -85,7 +88,7 @@ function NearbyRequests() {
         </select>
       </div>
 
-      {loading && <p className="text-sm text-gray-500">Loading requests...</p>}
+      {loading && <PageLoader label="Loading requests" />}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -117,7 +120,8 @@ function AcceptedRequests() {
   const { requests, loading, error, refetch } = useMyRequests("all");
   const actions = useRequestActions(refetch);
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState(() => searchParams.get("open")); // /requests?open=<id> from a notification
   const selectedRequest = useMemo(
     () => requests.find((r) => r._id === selectedId) ?? null,
     [requests, selectedId]
@@ -126,7 +130,7 @@ function AcceptedRequests() {
 
   return (
     <>
-      {loading && <p className="text-sm text-gray-500">Loading your requests...</p>}
+      {loading && <PageLoader label="Loading your requests" />}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
@@ -175,7 +179,8 @@ function PatientRequestList({ scope, showCreate, setShowCreate, onNewRequest }) 
   const { requests, loading, error, refetch } = useMyRequests(scope);
   const actions = useRequestActions(refetch);
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [searchParams] = useSearchParams();
+  const [selectedId, setSelectedId] = useState(() => searchParams.get("open")); // /requests?open=<id> from a notification
   const selectedRequest = useMemo(
     () => requests.find((r) => r._id === selectedId) ?? null,
     [requests, selectedId]
@@ -184,7 +189,7 @@ function PatientRequestList({ scope, showCreate, setShowCreate, onNewRequest }) 
 
   return (
     <>
-      {loading && <p className="text-sm text-gray-500">Loading your requests...</p>}
+      {loading && <PageLoader label="Loading your requests" />}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-3">

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import DashboardTopbar from "../../components/DashboardTopbar.jsx";
+import { PageLoader, Spinner } from "../../components/Spinner.jsx";
 import MyRequestCard from "../../components/requests/MyRequestCard.jsx";
 import NewRequestFlow from "../../components/requests/NewRequestFlow.jsx";
 import MatchingDonorsModal from "../../components/requests/MatchingDonorsModal.jsx";
@@ -65,7 +66,7 @@ export default function PatientHome() {
         <section>
           <h2 className="mb-4 text-lg font-bold text-gray-900">Your Active Requests</h2>
 
-          {loading && <p className="text-sm text-gray-500">Loading your requests...</p>}
+          {loading && <PageLoader label="Loading your requests" />}
           {error && <p className="text-sm text-red-600">{error}</p>}
 
           <div className="space-y-4">
@@ -85,11 +86,16 @@ export default function PatientHome() {
           <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm">
             {topRequest ? (
               <>
-                <p className="mb-4 text-gray-800">
-                  {donorsLoading
-                    ? "Searching for donors..."
-                    : `${donorCount} potential donor${donorCount === 1 ? "" : "s"} found near you`}
-                </p>
+                <div className="mb-4 text-gray-800">
+                  {donorsLoading ? (
+                    <span className="flex items-center gap-2 text-gray-600">
+                      <Spinner size={18} />
+                      Searching for donors…
+                    </span>
+                  ) : (
+                    `${donorCount} potential donor${donorCount === 1 ? "" : "s"} found near you`
+                  )}
+                </div>
                 <button
                   type="button"
                   onClick={() => setShowDonors(true)}

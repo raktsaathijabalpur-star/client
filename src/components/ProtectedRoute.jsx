@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import useAuthStore from "../store/authStore.js";
+import { PageLoader } from "./Spinner.jsx";
 
 // <ProtectedRoute />                      -> any logged-in user
 // <ProtectedRoute roles={["donor"]} />    -> only users with one of these roles
@@ -16,8 +17,8 @@ export default function ProtectedRoute({ roles, admin = false }) {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center text-gray-500">
-        Loading...
+      <div className="flex h-screen w-full items-center justify-center">
+        <PageLoader label="Loading" />
       </div>
     );
   }

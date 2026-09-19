@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Heart, ArrowLeft, X } from "lucide-react";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
+import { PageLoader } from "../components/Spinner.jsx";
 import api from "../api/axios.js";
 import useAuthStore from "../store/authStore.js";
 import useNotificationStore from "../store/notificationStore.js";
@@ -92,7 +93,7 @@ export default function DonationHistory() {
         </button>
       </div>
 
-      {loading && <p className="mb-3 text-sm text-gray-500">Loading donation history...</p>}
+      {loading && <PageLoader label="Loading donation history" />}
       {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
       <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm">

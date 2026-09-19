@@ -12,9 +12,12 @@ import Requests from "./pages/Requests.jsx";
 import Messages from "./pages/ChatBox.jsx";
 import Profile from "./pages/Profile.jsx";
 import AdminSupport from "./pages/AdminSupport.jsx";
+import AdminOverview from "./pages/AdminOverview.jsx";
+import AdminHistory from "./pages/AdminHistory.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardLayout from "./components/DashboardLayout.jsx";
+import AdminLayout from "./components/AdminLayout.jsx";
 import useAuthStore from "./store/authStore.js";
 import { ROLES } from "./utils/constants.js";
 
@@ -45,15 +48,19 @@ export default function App() {
           <Route path="/messages" element={<Messages />} />
           <Route path="/profile" element={<Profile />} />
 
-          {/* Admin only: confirm the contributions people report from Profile -> Donate Now */}
-          <Route element={<ProtectedRoute admin />}>
-            <Route path="/admin/support" element={<AdminSupport />} />
-          </Route>
-
           {/* Donor-only pages */}
           <Route element={<ProtectedRoute roles={[ROLES.DONOR]} />}>
             <Route path="/donations" element={<DonationHistory />} />
             <Route path="/top-donors" element={<TopDonors />} />
+          </Route>
+        </Route>
+
+        {/* Admin panel: its own layout and menu (no donor / patient pages inside) */}
+        <Route element={<ProtectedRoute admin />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin" element={<AdminOverview />} />
+            <Route path="/admin/support" element={<AdminSupport />} />
+            <Route path="/admin/history" element={<AdminHistory />} />
           </Route>
         </Route>
       </Route>

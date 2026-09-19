@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   User as UserIcon,
 } from "lucide-react";
+import Avatar from "./Avatar.jsx";
 import useAuthStore from "../store/authStore.js";
 
 const DONOR_NAV = [
@@ -39,9 +40,9 @@ function Sidebar({ variant = "desktop", onNavigate }) {
   const logout = useAuthStore((state) => state.logout);
 
   const baseNav = user?.role === "patient" ? PATIENT_NAV : DONOR_NAV;
-  // admins get one extra entry: confirm reported donations
+  // admins get one extra entry that opens the admin panel (its own menu + pages)
   const navItems = user?.isAdmin
-    ? [...baseNav, { to: "/admin/support", label: "Verify Donations", icon: ShieldCheck }]
+    ? [...baseNav, { to: "/admin", label: "Admin Panel", icon: ShieldCheck }]
     : baseNav;
 
   const shell =
@@ -55,7 +56,7 @@ function Sidebar({ variant = "desktop", onNavigate }) {
         <div className="flex items-center gap-2 px-6 py-6">
           <Droplet className="fill-brand-500 text-brand-500" size={26} />
           <div>
-            <p className="text-lg font-extrabold leading-none">RaktSaathi</p>
+            <p className="text-lg font-extrabold leading-none">Blood Seva</p>
             <p className="text-[11px] font-semibold tracking-wide text-brand-500">JABALPUR</p>
           </div>
         </div>
@@ -81,13 +82,7 @@ function Sidebar({ variant = "desktop", onNavigate }) {
 
       <div className="px-4 pb-6">
         <div className="flex items-center gap-3 px-2 py-3">
-          {user?.avatarUrl ? (
-            <img src={user.avatarUrl} alt="" className="h-9 w-9 rounded-full object-cover" />
-          ) : (
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-gray-200 text-xs font-semibold text-gray-600">
-              {user?.name?.slice(0, 2).toUpperCase() || "U"}
-            </div>
-          )}
+          <Avatar user={user} size={36} />
           <div className="min-w-0 leading-tight">
             <p className="truncate text-sm font-semibold text-gray-900">{user?.name || "Guest"}</p>
             <p className="truncate text-xs text-gray-500">
