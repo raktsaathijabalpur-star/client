@@ -1,8 +1,11 @@
 import React, { memo, useEffect, useState } from "react";
 import { Building2, MapPin, Clock, Phone, Copy, Check } from "lucide-react";
 import Modal from "./Modal.jsx";
+import ContactActions from "./ContactActions.jsx";
+import useAuthStore from "../store/authStore.js";
 import { REQUEST_STATUS_STYLES, URGENCY_STYLES } from "../utils/constants.js";
 import { formatDate, formatRequiredBy, requestStatusLabel } from "../utils/format.js";
+import { donorToPatientMessage, patientToDonorMessage } from "../utils/contact.js";
 
 function InfoRow({ icon: Icon, children }) {
   return (
@@ -43,6 +46,7 @@ function CopyableId({ value }) {
 //   patient (owner) -> request ID, accepted donors, Mark as Fulfilled / Cancel
 //   donor           -> I Can Donate (+ the patient's phone once they've accepted)
 function DetailBody({ request, onClose, actions }) {
+  const myName = useAuthStore((state) => state.user?.name);
   const urgency = URGENCY_STYLES[request.urgency] || URGENCY_STYLES.Normal;
   const statusStyle = REQUEST_STATUS_STYLES[request.status] || REQUEST_STATUS_STYLES.Open;
   const isActive = request.status === "Open" || request.status === "Accepted";
@@ -155,14 +159,12 @@ function DetailBody({ request, onClose, actions }) {
                       {donor.bloodGroup} · {donor.area || donor.city}
                     </p>
                   </div>
-                  {donor.phone && (
-                    <a
-                      href={`tel:${donor.phone}`}
-                      className="shrink-0 text-xs font-semibold text-brand-600"
-                    >
-                      {donor.phone}
-                    </a>
-                  )}
+                  <ContactActions
+                    phone={donor.phone}
+                    userId={donor._id}
+                    name={donor.name}
+                    whatsappText={patientToDonorMessage(request, donor.name, myName)}
+                  />
                 </li>
               );
             })}
@@ -220,10 +222,18 @@ function DetailBody({ request, onClose, actions }) {
       )}
 
       {!request.isOwner && request.hasHelped && isActive && (
-        <p className="rounded-xl bg-green-50 px-4 py-3 text-sm text-green-800">
-          Thank you! The patient has been notified. Please call them on the number above
-          to coordinate.
-        </p>
+        <div className="rounded-xl bg-green-50 p-4">
+          <p className="mb-3 text-sm text-green-800">
+            Thank you! The patient has been notified. Get in touch to coordinate:
+          </p>
+          <ContactActions
+            variant="labeled"
+            phone={request.contactPhone}
+            userId={request.requestedBy?._id}
+            name={request.patientName}
+            whatsappText={donorToPatientMessage(request, myName)}
+          />
+        </div>
       )}
     </Modal>
   );

@@ -10,7 +10,8 @@ import Supporters from "./pages/Supporter.jsx";
 import TopDonors from "./pages/TopDonor.jsx";
 import Requests from "./pages/Requests.jsx";
 import Messages from "./pages/ChatBox.jsx";
-import Placeholder from "./pages/Placeholder.jsx";
+import Profile from "./pages/Profile.jsx";
+import AdminSupport from "./pages/AdminSupport.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import DashboardLayout from "./components/DashboardLayout.jsx";
@@ -42,7 +43,12 @@ export default function App() {
           <Route path="/requests" element={<Requests />} />
           <Route path="/supporters" element={<Supporters />} />
           <Route path="/messages" element={<Messages />} />
-          <Route path="/profile" element={<Placeholder title="Profile" />} />
+          <Route path="/profile" element={<Profile />} />
+
+          {/* Admin only: confirm the contributions people report from Profile -> Donate Now */}
+          <Route element={<ProtectedRoute admin />}>
+            <Route path="/admin/support" element={<AdminSupport />} />
+          </Route>
 
           {/* Donor-only pages */}
           <Route element={<ProtectedRoute roles={[ROLES.DONOR]} />}>

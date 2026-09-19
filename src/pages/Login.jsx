@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import React, { useCallback, useRef, useState } from "react";
+import { Link, Navigate, useNavigate, useLocation } from "react-router-dom";
 import { Droplet } from "lucide-react";
 import useAuthStore from "../store/authStore.js";
 
@@ -12,10 +12,13 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const submittedRef = useRef(false); // true once THIS page started a login
 
   const handleSubmit = useCallback(
     async (e) => {
       e.preventDefault();
+      submittedRef.current = true;
       setError("");
       setSubmitting(true);
       try {
@@ -31,10 +34,16 @@ export default function Login() {
     [identifier, password, login, navigate, location]
   );
 
+  // Already signed in (and not because of this form): don't offer a second login on top of it.
+  // To use another account, sign out first.
+  if (isAuthenticated && !submittedRef.current) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f4f2f0]">
       <header className="bg-white border-b border-gray-200">
-        <div className="max-w-6xl mx-auto flex items-center px-6 py-4">
+        <div className="max-w-6xl mx-auto flex items-center px-4 sm:px-6 py-4">
           <Link to="/" className="flex items-center gap-2">
             <Droplet className="text-brand-500 fill-brand-500" size={26} />
             <div>
@@ -45,8 +54,8 @@ export default function Login() {
         </div>
       </header>
 
-      <main className="flex items-center justify-center px-6 py-24">
-        <div className="bg-white rounded-2xl shadow-sm max-w-md w-full p-8">
+      <main className="flex items-center justify-center px-4 sm:px-6 py-10 sm:py-24">
+        <div className="bg-white rounded-2xl shadow-sm max-w-md w-full p-5 sm:p-8">
           <h2 className="text-2xl font-extrabold text-gray-900">Welcome back</h2>
           <p className="text-gray-500 text-sm mt-1 mb-6">
             Login to continue helping your community.

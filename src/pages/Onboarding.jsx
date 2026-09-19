@@ -22,7 +22,7 @@ export default function Onboarding() {
   return (
     <div className="min-h-screen bg-[#f4f2f0]">
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
             <Droplet className="fill-brand-500 text-brand-500" size={26} />
             <div>
@@ -33,8 +33,8 @@ export default function Onboarding() {
         </div>
       </header>
 
-      <main className="flex items-center justify-center px-6 py-12">
-        <div className={`w-full rounded-2xl bg-white p-8 shadow-sm ${isPatient ? "max-w-xl" : "max-w-md"}`}>
+      <main className="flex items-center justify-center px-4 py-6 sm:px-6 sm:py-12">
+        <div className={`w-full rounded-2xl bg-white p-5 shadow-sm sm:p-8 ${isPatient ? "max-w-xl" : "max-w-md"}`}>
           {isPatient ? (
             <CreateRequestForm onCreated={setSubmitted} />
           ) : (

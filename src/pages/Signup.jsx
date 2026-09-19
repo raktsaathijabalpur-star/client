@@ -1,5 +1,5 @@
-import React, { useCallback, useMemo, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import React, { useCallback, useMemo, useRef, useState } from "react";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { Droplet } from "lucide-react";
 import useAuthStore from "../store/authStore.js";
 import StepProgress from "../components/signup/StepProgress.jsx";
@@ -33,6 +33,8 @@ const INITIAL_FORM = {
 
 export default function Signup() {
   const register = useAuthStore((state) => state.register);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const submittedRef = useRef(false); // true once THIS page started a sign-up
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const intent = searchParams.get("intent"); // "donate" | "need" | null
@@ -98,6 +100,7 @@ export default function Signup() {
       const finalForm = { ...form, ...values };
       setForm(finalForm);
       setSubmitError("");
+      submittedRef.current = true;
       setSubmitting(true);
       try {
         await register({
@@ -125,10 +128,15 @@ export default function Signup() {
     [form, register, navigate, role]
   );
 
+  // Already signed in: sign out before creating another account
+  if (isAuthenticated && !submittedRef.current) {
+    return <Navigate to="/home" replace />;
+  }
+
   return (
     <div className="min-h-screen bg-[#f4f2f0]">
       <header className="border-b border-gray-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center px-4 py-4 sm:px-6">
           <Link to="/" className="flex items-center gap-2">
             <Droplet className="fill-brand-500 text-brand-500" size={26} />
             <div>
@@ -139,8 +147,8 @@ export default function Signup() {
         </div>
       </header>
 
-      <main className="flex items-center justify-center px-6 py-16">
-        <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-sm">
+      <main className="flex items-center justify-center px-4 py-8 sm:px-6 sm:py-16">
+        <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-sm sm:p-8">
           <StepProgress step={step} totalSteps={TOTAL_STEPS} onBack={goBack} />
 
           {step === 1 && (

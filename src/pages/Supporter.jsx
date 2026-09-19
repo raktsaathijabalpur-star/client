@@ -1,16 +1,7 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
 import api from "../api/axios.js";
-
-// Fallback sample data — sirf tab dikhta hai jab backend se data na aaye
-// ya API call fail ho jaaye, taaki UI kabhi khali na lage.
-const SAMPLE_SUPPORTERS = [
-  { _id: "s1", name: "Priya Verma", amount: 500, timestamp: Date.now() - 2 * 60 * 1000 },
-  { _id: "s2", name: "Aman Gupta", amount: 1000, timestamp: Date.now() - 10 * 60 * 1000 },
-  { _id: "s3", name: "Sunita Rao", amount: 100, timestamp: Date.now() - 25 * 60 * 1000 },
-  { _id: "s4", name: "Karan Mehta", amount: 500, timestamp: Date.now() - 60 * 60 * 1000 },
-  { _id: "s5", name: "Neha Joshi", amount: 250, timestamp: Date.now() - 3 * 60 * 60 * 1000 },
-];
 
 function timeAgo(timestamp) {
   const diffMs = Date.now() - new Date(timestamp).getTime();
@@ -27,9 +18,12 @@ function formatAmount(n) {
   return `₹${Number(n).toLocaleString("en-IN")}`;
 }
 
+// Contributions made from Profile -> "Donate Now" -> "I've Donated".
+// Real data only (no sample supporters): the API returns the ones you verified.
 export default function Supporters() {
   const [supporters, setSupporters] = useState([]);
-  const [totalSupporters, setTotalSupporters] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const [totalAmount, setTotalAmount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -40,19 +34,13 @@ export default function Supporters() {
       setError(null);
       try {
         const res = await api.get("/supporters");
-        const list = Array.isArray(res.data) ? res.data : res.data?.supporters ?? [];
-        const count = res.data?.totalCount ?? list.length;
-        if (active) {
-          setSupporters(list.length ? list : SAMPLE_SUPPORTERS);
-          setTotalSupporters(list.length ? count : SAMPLE_SUPPORTERS.length + 123);
-        }
+        if (!active) return;
+        setSupporters(res.data?.supporters ?? []);
+        setTotalCount(res.data?.totalCount ?? 0);
+        setTotalAmount(res.data?.totalAmount ?? 0);
       } catch (err) {
         console.error(err);
-        if (active) {
-          setError("Could not load supporters. Showing sample data.");
-          setSupporters(SAMPLE_SUPPORTERS);
-          setTotalSupporters(128);
-        }
+        if (active) setError(err.response?.data?.message || "Could not load supporters.");
       } finally {
         if (active) setLoading(false);
       }
@@ -62,45 +50,61 @@ export default function Supporters() {
     };
   }, []);
 
-  const recentSupporters = useMemo(
-    () => [...supporters].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)),
-    [supporters]
-  );
-
   return (
     <div>
       <DashboardTopbar title="Supporters" />
 
-      {loading && <p className="text-gray-500 text-sm mb-3">Loading supporters...</p>}
-      {error && <p className="text-amber-600 text-xs mb-3">{error}</p>}
+      {loading && <p className="mb-3 text-sm text-gray-500">Loading supporters...</p>}
+      {error && <p className="mb-3 text-sm text-red-600">{error}</p>}
 
-      <div className="bg-gradient-to-br from-brand-600 to-brand-900 rounded-2xl p-8 text-white text-center mb-8">
-        <p className="text-4xl sm:text-5xl font-extrabold mb-2">{totalSupporters}</p>
-        <p className="text-white/80 text-sm sm:text-base">
-          people have supported Jabalpur RaktSaathi
+      <div className="mb-6 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-6 text-center text-white sm:mb-8 sm:p-8">
+        <p className="mb-2 text-4xl font-extrabold sm:text-5xl">{totalCount}</p>
+        <p className="text-sm text-white/80 sm:text-base">
+          {totalCount === 1 ? "person has" : "people have"} supported Jabalpur RaktSaathi
         </p>
+        {totalAmount > 0 && (
+          <p className="mt-3 text-sm font-semibold text-white/90 sm:text-base">
+            {formatAmount(totalAmount)} contributed so far
+          </p>
+        )}
       </div>
 
-      <h2 className="text-lg font-bold text-gray-900 mb-4">Recent Supporters</h2>
+      <h2 className="mb-4 text-lg font-bold text-gray-900">Recent Supporters</h2>
 
-      <div className="rounded-2xl bg-white shadow-sm divide-y divide-gray-100 overflow-hidden">
-        {recentSupporters.map((supporter) => (
+      <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl bg-white shadow-sm">
+        {supporters.map((supporter) => (
           <div
             key={supporter._id}
             className="flex items-center justify-between gap-3 px-5 py-4 sm:px-6 sm:py-5"
           >
-            <div>
-              <p className="font-bold text-gray-900 text-sm sm:text-base">{supporter.name}</p>
-              <p className="text-gray-500 text-xs sm:text-sm">{timeAgo(supporter.timestamp)}</p>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-bold text-gray-900 sm:text-base">{supporter.name}</p>
+              <p className="text-xs text-gray-500 sm:text-sm">
+                {timeAgo(supporter.timestamp)}
+                {supporter.status === "pending" && (
+                  <span className="ml-2 inline-block whitespace-nowrap rounded-full bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-700">
+                    Awaiting confirmation
+                  </span>
+                )}
+              </p>
             </div>
-            <span className="font-bold text-red-600 text-sm sm:text-base shrink-0">
+            <span className="shrink-0 text-sm font-bold text-red-600 sm:text-base">
               {formatAmount(supporter.amount)}
             </span>
           </div>
         ))}
 
-        {!loading && recentSupporters.length === 0 && (
-          <p className="text-gray-500 text-sm px-6 py-6">No supporters yet.</p>
+        {!loading && !error && supporters.length === 0 && (
+          <div className="px-6 py-8 text-center text-sm text-gray-500">
+            <p>No supporters yet.</p>
+            <p className="mt-1">
+              Be the first: open{" "}
+              <Link to="/profile" className="font-semibold text-brand-600">
+                Profile
+              </Link>{" "}
+              and tap "Donate Now".
+            </p>
+          </div>
         )}
       </div>
     </div>

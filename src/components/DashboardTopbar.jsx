@@ -14,14 +14,14 @@ function DashboardTopbar({ title }) {
   };
 
   return (
-    <div className="relative mb-6 flex items-center justify-between">
-      <h1 className="text-2xl font-extrabold text-gray-900">{title}</h1>
+    <div className="relative mb-4 flex items-center justify-between gap-3 sm:mb-6">
+      <h1 className="min-w-0 truncate text-xl font-extrabold text-gray-900 sm:text-2xl">{title}</h1>
 
       <button
         type="button"
         aria-label="Notifications"
         onClick={toggle}
-        className="relative flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-white"
+        className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-gray-200 bg-white"
       >
         <Bell size={18} className="text-brand-500" />
         {unreadCount > 0 && (
@@ -32,7 +32,7 @@ function DashboardTopbar({ title }) {
       {open && (
         <>
           <div className="fixed inset-0 z-30" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-12 z-40 w-80 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-lg">
+          <div className="absolute right-0 top-12 z-40 w-72 max-w-[calc(100vw-2rem)] overflow-hidden sm:w-80 rounded-2xl border border-gray-200 bg-white shadow-lg">
             <p className="border-b border-gray-100 px-4 py-3 text-sm font-bold text-gray-900">
               Notifications
             </p>

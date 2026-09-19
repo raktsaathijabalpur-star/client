@@ -3,6 +3,7 @@ import { Send, MessageCircle } from "lucide-react";
 import DashboardTopbar from "../components/DashboardTopbar.jsx";
 import useAuthStore from "../store/authStore.js";
 import useChatStore from "../store/chatStore.js";
+import { getUserId, isOwnMessage } from "../utils/chat.js";
 
 function timeString(date) {
   return new Date(date).toLocaleTimeString("en-IN", { hour: "numeric", minute: "2-digit" });
@@ -10,6 +11,7 @@ function timeString(date) {
 
 export default function Messages() {
   const currentUser = useAuthStore((s) => s.user);
+  const currentUserId = getUserId(currentUser);
 
   const conversations = useChatStore((s) => s.conversations);
   const loadingConversations = useChatStore((s) => s.loadingConversations);
@@ -30,7 +32,9 @@ export default function Messages() {
   const emitTyping = useChatStore((s) => s.emitTyping);
 
   const [input, setInput] = useState("");
-  const [showChatOnMobile, setShowChatOnMobile] = useState(false);
+  const [showChatOnMobile, setShowChatOnMobile] = useState(() =>
+    Boolean(useChatStore.getState().activeConversationId)
+  );
   const [startingChatWith, setStartingChatWith] = useState(null);
   const bottomRef = useRef(null);
   const typingTimeoutRef = useRef(null);
@@ -39,7 +43,11 @@ export default function Messages() {
     initListeners();
     fetchConversations();
     fetchAllUsers();
-  }, [initListeners, fetchConversations, fetchAllUsers]);
+  }, [initListeners, fetchConversations, fetchAllUsers, currentUserId]);
+
+  useEffect(() => {
+    if (!activeConversationId) setShowChatOnMobile(false);
+  }, [activeConversationId]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -94,7 +102,7 @@ export default function Messages() {
     <div>
       <DashboardTopbar title="Messages" />
 
-      <div className="flex h-[calc(100vh-160px)] min-h-[500px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100">
+      <div className="flex h-[calc(100dvh-10.5rem)] min-h-[420px] bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 lg:h-[calc(100dvh-10rem)]">
         {/* Left panel: conversations + all users */}
         <div
           className={`w-full md:w-80 shrink-0 border-r border-gray-100 bg-white overflow-y-auto ${
@@ -111,7 +119,7 @@ export default function Messages() {
               key={c._id}
               type="button"
               onClick={() => handleSelectConversation(c._id)}
-              className={`w-full text-left px-5 py-4 border-b border-gray-50 flex items-center gap-3 transition-colors ${
+              className={`w-full text-left px-4 sm:px-5 py-4 border-b border-gray-50 flex items-center gap-3 transition-colors ${
                 c._id === activeConversationId ? "bg-red-50" : "hover:bg-gray-50"
               }`}
             >
@@ -168,7 +176,7 @@ export default function Messages() {
         </div>
 
         {/* Chat panel */}
-        <div className={`flex-1 flex flex-col bg-white ${showChatOnMobile ? "flex" : "hidden md:flex"}`}>
+        <div className={`min-w-0 flex-1 flex-col bg-white ${showChatOnMobile ? "flex" : "hidden md:flex"}`}>
           {!activeConversation && (
             <div className="flex-1 flex items-center justify-center text-gray-400 text-sm">
               Select a conversation to start chatting
@@ -177,11 +185,12 @@ export default function Messages() {
 
           {activeConversation && (
             <>
-              <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3 px-3 py-3 sm:px-5 sm:py-4 border-b border-gray-100">
                 <button
                   type="button"
                   onClick={() => setShowChatOnMobile(false)}
-                  className="md:hidden text-gray-500 mr-1"
+                  aria-label="Back to conversations"
+                  className="md:hidden flex h-9 w-9 items-center justify-center rounded-full text-lg text-gray-600 hover:bg-gray-100"
                 >
                   ←
                 </button>
@@ -207,11 +216,11 @@ export default function Messages() {
                 </div>
               </div>
 
-              <div className="flex-1 overflow-y-auto px-5 py-4 space-y-3">
+              <div className="flex-1 overflow-y-auto px-3 py-4 sm:px-5 space-y-3">
                 {loadingMessages && <p className="text-gray-400 text-xs">Loading messages...</p>}
 
                 {messages.map((m) => {
-                  const isMine = m.sender?._id === currentUser?._id || m.sender === currentUser?._id;
+                  const isMine = isOwnMessage(m, currentUser);
                   return (
                     <div key={m._id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
                       <div
@@ -221,7 +230,7 @@ export default function Messages() {
                             : "bg-gray-100 text-gray-900 rounded-bl-sm"
                         }`}
                       >
-                        <p className="text-sm">{m.text}</p>
+                        <p className="text-sm break-words whitespace-pre-wrap">{m.text}</p>
                         <p
                           className={`text-[10px] mt-1 text-right ${
                             isMine ? "text-white/70" : "text-gray-400"
@@ -241,14 +250,14 @@ export default function Messages() {
                 <div ref={bottomRef} />
               </div>
 
-              <div className="flex items-center gap-3 px-4 py-3 border-t border-gray-100">
+              <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-3 border-t border-gray-100">
                 <input
                   type="text"
                   value={input}
                   onChange={handleInputChange}
                   onKeyDown={(e) => e.key === "Enter" && handleSend()}
                   placeholder="Type a message..."
-                  className="flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm outline-none focus:border-red-400"
+                  className="min-w-0 flex-1 rounded-full border border-gray-200 bg-gray-50 px-4 py-2.5 text-base sm:text-sm outline-none focus:border-red-400"
                 />
                 <button
                   type="button"

@@ -45,7 +45,7 @@ function LocationStep({ initialValues, onContinue, submitting }) {
       <h2 className="text-2xl font-extrabold text-gray-900 mb-6">Where are you located?</h2>
 
       <div className="space-y-4">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="city" className="block text-sm text-gray-700 mb-1">City</label>
             <input
@@ -74,7 +74,7 @@ function LocationStep({ initialValues, onContinue, submitting }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div>
             <label htmlFor="area" className="block text-sm text-gray-700 mb-1">Area</label>
             <input

@@ -44,8 +44,8 @@ export default function PatientHome() {
     <div>
       <DashboardTopbar title="Home" />
 
-      <div className="mb-8 grid gap-5 md:grid-cols-2">
-        <div className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="mb-6 grid gap-4 sm:mb-8 sm:gap-5 md:grid-cols-2">
+        <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm sm:p-6">
           <h2 className="text-2xl font-extrabold text-gray-900">Need Blood?</h2>
           <p className="mt-2 text-gray-500">
             Post a request and we'll start matching donors near you right away.
@@ -55,7 +55,7 @@ export default function PatientHome() {
         <button
           type="button"
           onClick={() => setShowCreate(true)}
-          className="rounded-2xl bg-brand-600 p-6 text-lg font-extrabold text-white transition-colors hover:bg-brand-700"
+          className="rounded-2xl bg-brand-600 p-5 text-lg font-extrabold text-white transition-colors hover:bg-brand-700 sm:p-6"
         >
           + Request Blood
         </button>

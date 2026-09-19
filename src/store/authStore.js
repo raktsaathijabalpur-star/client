@@ -9,6 +9,14 @@ import useNotificationStore from "./notificationStore.js";
 // selector (e.g. `useAuthStore((s) => s.user)`) so they only re-render
 // when the specific slice they read actually changes — Zustand does this
 // out of the box without any memoization boilerplate.
+// Wipes everything that belongs to the previous account: the live socket, chats, notifications.
+// Called on logout AND before a different account signs in.
+function clearSession() {
+  disconnectSocket();
+  useChatStore.getState().reset();
+  useNotificationStore.getState().reset();
+}
+
 const useAuthStore = create(
   persist(
     (set, get) => ({
@@ -19,23 +27,20 @@ const useAuthStore = create(
 
       login: async (identifier, password) => {
         const { data } = await api.post("/auth/login", { identifier, password });
+        clearSession(); // never carry the previous account's socket / chats into this one
         set({ token: data.token, user: data.user, isAuthenticated: true });
         return data.user;
       },
 
       register: async (payload) => {
         const { data } = await api.post("/auth/register", payload);
+        clearSession();
         set({ token: data.token, user: data.user, isAuthenticated: true });
         return data.user;
       },
 
       logout: () => {
-        // Close the live socket and wipe per-user state, otherwise the next
-        // person to log in on this browser would keep the old user's socket
-        // (and old chat / notification data).
-        disconnectSocket();
-        useChatStore.getState().reset();
-        useNotificationStore.getState().reset();
+        clearSession();
         set({ token: null, user: null, isAuthenticated: false });
       },
 

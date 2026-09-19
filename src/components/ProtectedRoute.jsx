@@ -4,12 +4,14 @@ import useAuthStore from "../store/authStore.js";
 
 // <ProtectedRoute />                      -> any logged-in user
 // <ProtectedRoute roles={["donor"]} />    -> only users with one of these roles
-export default function ProtectedRoute({ roles }) {
+// <ProtectedRoute admin />                -> only admins (users with isAdmin)
+export default function ProtectedRoute({ roles, admin = false }) {
   // Selecting each field separately means this component only re-renders
   // when these specific values change — not on every user/token update.
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   const loading = useAuthStore((state) => state.loading);
   const role = useAuthStore((state) => state.user?.role);
+  const isAdmin = useAuthStore((state) => state.user?.isAdmin === true);
   const location = useLocation();
 
   if (loading) {
@@ -26,6 +28,10 @@ export default function ProtectedRoute({ roles }) {
 
   // Users created before roles existed have no `role` -> treat them as donors
   if (roles && !roles.includes(role ?? "donor")) {
+    return <Navigate to="/home" replace />;
+  }
+
+  if (admin && !isAdmin) {
     return <Navigate to="/home" replace />;
   }
 

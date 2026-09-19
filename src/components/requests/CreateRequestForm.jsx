@@ -72,7 +72,7 @@ export default function CreateRequestForm({ onCreated, heading = "Let's find the
     <form onSubmit={handleSubmit}>
       <h2 className="mb-6 text-2xl font-extrabold text-gray-900">{heading}</h2>
 
-      <div className="mb-5 grid grid-cols-4 gap-3">
+      <div className="mb-5 grid grid-cols-4 gap-2 sm:gap-3">
         {BLOOD_GROUPS.map((bg) => (
           <button
             key={bg}
@@ -158,7 +158,7 @@ export default function CreateRequestForm({ onCreated, heading = "Let's find the
       </div>
 
       <p className="mb-2 text-sm text-gray-600">Urgency</p>
-      <div className="mb-6 grid grid-cols-3 gap-3">
+      <div className="mb-6 grid grid-cols-1 gap-2 min-[360px]:grid-cols-3 sm:gap-3">
         {URGENCY_LEVELS.map((level) => {
           const style = URGENCY_OPTION_STYLES[level];
           const selected = form.urgency === level;
@@ -168,11 +168,11 @@ export default function CreateRequestForm({ onCreated, heading = "Let's find the
               type="button"
               onClick={() => setField("urgency", level)}
               aria-pressed={selected}
-              className={`flex items-center justify-center gap-2 rounded-xl border py-3 text-sm font-semibold transition-colors ${
+              className={`flex items-center justify-center gap-1 rounded-xl border px-1 py-3 text-[11px] font-semibold transition-colors min-[400px]:text-xs sm:gap-2 sm:text-sm ${
                 selected ? style.selected : "border-gray-200 text-gray-700 hover:bg-gray-50"
               }`}
             >
-              <span className={`h-2.5 w-2.5 rounded-full ${style.dot}`} />
+              <span className={`h-2 w-2 shrink-0 rounded-full sm:h-2.5 sm:w-2.5 ${style.dot}`} />
               {level}
             </button>
           );

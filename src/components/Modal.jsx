@@ -15,13 +15,13 @@ export default function Modal({ onClose, title, showBack = false, maxWidth = "ma
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-3 sm:p-4"
       onClick={onClose}
     >
       <div
         role="dialog"
         aria-modal="true"
-        className={`relative w-full ${maxWidth} max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-xl`}
+        className={`relative w-full ${maxWidth} max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-2xl bg-white p-4 shadow-xl sm:max-h-[90vh] sm:p-6`}
         onClick={(e) => e.stopPropagation()}
       >
         {title ? (

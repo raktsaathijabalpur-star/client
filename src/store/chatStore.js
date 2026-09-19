@@ -12,13 +12,31 @@ const initialState = {
   typingUserId: null,
   allUsers: [],
   loadingUsers: false,
+  ownerId: null, // the user this data was loaded for
 };
+
+// The listeners this store attached. Kept here so initListeners() can remove
+// exactly its own handlers — a bare socket.off("message:new") would also remove
+// other parts of the app that listen to the same event (e.g. the "new message" toast).
+let attached = null;
 
 const useChatStore = create((set, get) => ({
   ...initialState,
 
   // Called on logout so the next user doesn't see the previous user's chats
   reset: () => set({ ...initialState }),
+
+  // Safety net: if the signed-in user ever differs from the one this data was loaded
+  // for (any route the account could change by), drop everything instead of showing it.
+  bindToUser: (userId) => {
+    const { ownerId } = get();
+    if (ownerId === userId) return;
+    if (ownerId === null) {
+      set({ ownerId: userId });
+      return;
+    }
+    set({ ...initialState, ownerId: userId });
+  },
 
   fetchAllUsers: async () => {
     set({ loadingUsers: true });
@@ -31,8 +49,9 @@ const useChatStore = create((set, get) => ({
     }
   },
 
-  fetchConversations: async () => {
-    set({ loadingConversations: true });
+  // { silent: true } refreshes the list without the "Loading..." flash
+  fetchConversations: async ({ silent = false } = {}) => {
+    if (!silent) set({ loadingConversations: true });
     try {
       const { data } = await api.get("/conversations");
       set({ conversations: data.conversations, loadingConversations: false });
@@ -46,7 +65,15 @@ const useChatStore = create((set, get) => ({
     set({ activeConversationId: conversationId, messages: [], loadingMessages: true });
     try {
       const { data } = await api.get(`/conversations/${conversationId}/messages`);
-      set({ messages: data.messages, loadingMessages: false });
+      // the person may have opened another chat while this was loading
+      if (get().activeConversationId !== conversationId) return;
+
+      set((state) => {
+        // keep any message that arrived live while the history was loading
+        const loaded = new Set(data.messages.map((m) => m._id));
+        const arrivedMeanwhile = state.messages.filter((m) => !loaded.has(m._id));
+        return { messages: [...data.messages, ...arrivedMeanwhile], loadingMessages: false };
+      });
       // Clear unread badge locally
       set((state) => ({
         conversations: state.conversations.map((c) =>
@@ -61,7 +88,7 @@ const useChatStore = create((set, get) => ({
 
   startConversationWith: async (otherUserId) => {
     const { data } = await api.post("/conversations", { otherUserId });
-    await get().fetchConversations();
+    await get().fetchConversations({ silent: true });
     return data.conversation._id;
   },
 
@@ -82,20 +109,35 @@ const useChatStore = create((set, get) => ({
     );
   },
 
-  // Called once on app/chat mount to wire up live listeners
+  // Called when the Messages page opens, to wire up live listeners
   initListeners: () => {
     const socket = getSocket();
     if (!socket) return;
 
-    socket.off("message:new");
-    socket.on("message:new", ({ conversationId, message }) => {
-      const { activeConversationId } = get();
+    // remove the handlers from a previous call (this store's own only)
+    if (attached) {
+      attached.socket.off("message:new", attached.onMessage);
+      attached.socket.off("presence:update", attached.onPresence);
+      attached.socket.off("typing", attached.onTyping);
+    }
+
+    const onMessage = ({ conversationId, message }) => {
+      const { activeConversationId, conversations } = get();
+
       if (conversationId === activeConversationId) {
         set((state) => {
           if (state.messages.some((m) => m._id === message._id)) return state;
           return { messages: [...state.messages, message] };
         });
       }
+
+      // First message of a brand-new conversation (started by the other person):
+      // it isn't in our list yet, so fetch the list instead of dropping the message.
+      if (!conversations.some((c) => c._id === conversationId)) {
+        get().fetchConversations({ silent: true });
+        return;
+      }
+
       set((state) => ({
         conversations: state.conversations
           .map((c) =>
@@ -111,17 +153,20 @@ const useChatStore = create((set, get) => ({
           )
           .sort((a, b) => new Date(b.lastMessageAt) - new Date(a.lastMessageAt)),
       }));
-    });
+    };
 
-    socket.off("presence:update");
-    socket.on("presence:update", ({ userId, online }) => {
+    const onPresence = ({ userId, online }) => {
       set((state) => ({ onlineMap: { ...state.onlineMap, [userId]: online } }));
-    });
+    };
 
-    socket.off("typing");
-    socket.on("typing", ({ userId, isTyping }) => {
+    const onTyping = ({ userId, isTyping }) => {
       set({ typingUserId: isTyping ? userId : null });
-    });
+    };
+
+    socket.on("message:new", onMessage);
+    socket.on("presence:update", onPresence);
+    socket.on("typing", onTyping);
+    attached = { socket, onMessage, onPresence, onTyping };
   },
 
   emitTyping: (otherUserId, isTyping) => {

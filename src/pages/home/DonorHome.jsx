@@ -47,8 +47,8 @@ export default function DonorHome() {
     <div>
       <DashboardTopbar title="Home" />
 
-      <div className="mb-6 grid gap-5 md:grid-cols-2">
-        <div className="flex items-center justify-between rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-6 text-white">
+      <div className="mb-4 grid gap-4 sm:mb-6 sm:gap-5 md:grid-cols-2">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-gradient-to-br from-brand-600 to-brand-900 p-5 text-white sm:p-6">
           <div>
             <p className="mb-2 text-xs uppercase tracking-wide text-white/70">Your Blood Group</p>
             <p className="text-4xl font-extrabold">{user?.bloodGroup}</p>
@@ -71,14 +71,14 @@ export default function DonorHome() {
 
         <Link
           to="/requests"
-          className="flex items-center gap-3 rounded-2xl bg-gray-900 p-6 text-white transition-colors hover:bg-gray-800"
+          className="flex items-center justify-center gap-3 rounded-2xl bg-gray-900 p-5 text-white transition-colors hover:bg-gray-800 sm:justify-start sm:p-6"
         >
           <Heart className="fill-red-500 text-red-500" size={22} />
           <span className="text-lg font-bold">Find Someone to Help</span>
         </Link>
       </div>
 
-      <div className="mb-8 grid grid-cols-3 gap-5">
+      <div className="mb-6 grid grid-cols-3 gap-2 sm:mb-8 sm:gap-5">
         <StatCard
           icon={<Heart className="fill-red-500 text-red-500" size={22} />}
           value={user?.donationsCount ?? 0}
